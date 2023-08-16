@@ -15,6 +15,7 @@ const salt = bcrypt.genSaltSync(10);
 const secret = 'asdfe45we45w345wegw345werjktjwertkj';
 
 app.use(cors({credentials:true,origin:'http://localhost:3000'}));
+
 app.use(express.json());
 app.use(cookieParser());
 app.use('/uploads', express.static(__dirname + '/uploads'));
@@ -119,19 +120,40 @@ app.put('/post',uploadMiddleware.single('file'), async (req,res) => {
 });
 
 
-app.get('/post', async (req,res) => {
-  res.json(
-    await Post.find()
+// app.get('/post', async (req,res) => {
+//   res.json(
+//     await Post.find()
+//       .populate('author', ['username'])
+//       .sort({createdAt: -1})
+//       .limit(20)
+//   );
+// });
+
+// app.get('/post/:id', async (req, res) => {
+//   const {id} = req.params;
+//   const postDoc = await Post.findById(id).populate('author', ['username']);
+//   res.json(postDoc);
+// })
+app.get('/post', async (req, res) => {
+  const { author } = req.query; // Get the author's ID from query parameters
+
+  let query = Post.find();//takes all the posts
+  if (author) {
+    query = query.where('author').equals(author); // Filter posts by author's ID
+  }
+
+  try {
+    const posts = await query
       .populate('author', ['username'])
-      .sort({createdAt: -1})
+      .sort({ createdAt: -1 })
       .limit(20)
-  );
+      .exec();
+
+    res.json(posts);
+  } catch (error) {
+    res.status(500).json({ error: 'An error occurred while fetching posts.' });
+  }
 });
 
-app.get('/post/:id', async (req, res) => {
-  const {id} = req.params;
-  const postDoc = await Post.findById(id).populate('author', ['username']);
-  res.json(postDoc);
-})
 
 app.listen(5000);
