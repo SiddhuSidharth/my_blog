@@ -129,11 +129,11 @@ app.put('/post',uploadMiddleware.single('file'), async (req,res) => {
 //   );
 // });
 
-// app.get('/post/:id', async (req, res) => {
-//   const {id} = req.params;
-//   const postDoc = await Post.findById(id).populate('author', ['username']);
-//   res.json(postDoc);
-// })
+app.get('/post/:id', async (req, res) => {
+  const {id} = req.params;
+  const postDoc = await Post.findById(id).populate('author', ['username']);
+  res.json(postDoc);
+})
 app.get('/post', async (req, res) => {
   const { author } = req.query; // Get the author's ID from query parameters
 
